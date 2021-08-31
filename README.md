@@ -1,9 +1,3 @@
-<html>
-  <head>
-    <meta name="google-site-verification" content="SZ1PDilxZZ25B_97z9crWOqkiTIT5MVL_vDlkV0Adfs" />
-  </head>
-</html>
-
 *GitHub does not support LaTeX inlines formulas. To correctly display the contents of the README file, it is recommended to use a light theme.*
 
 <!-- PROJECT -->
