@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>odepy - msoczi</title>
+    <style>
+        .tab {
+            display: inline-block;
+            margin-left: 40px;
+        }
+    </style>
+
+
+<!-- PROJECT -->
+<p><br /></p>
+<p align="center">
+  <h3 align="center">ODE&#39;s solving with odepy</h3>
+</p>
+
+<center>
+<br>
+This page was generated automaticly from .md source. For better visual experience, please go to the website <a href="https://github.com/msoczi/odepy">odepy on GitHub</a>
+</center>
+<br>
+<br>
+<br>
+
+<p><code>odepy</code> is a module for numerical solving of ordinary differential equations and systems of equations of the order <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation"> in explicit form.
+<br/><br/></p>
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents:</summary>
+  <ol>
+    <li><a href="#About">About</a></li>
+    <li><a href="#Installation">Installation</a></li>
+    <li><a href="#Examples">Examples</a></li>
+      <ul>
+          <li><a href="#Example1">Introduction</a></li>
+          <li><a href="#Example2">Example: Lotka–Volterra equations</a></li>
+          <li><a href="#Example3">System of differential equations</a></li>
+      </ul>
+  </ol>
+</details>
+
+
+
+<h2 id="about">About</h2>
+<p>The aim of this project was to create a tool enabling the easiest way and with minimal involvement of the user, to solve systems of ordinary differential equations.
+This package contains implementations of the most popular numerical methods used to solve ODE&#39;s such as: Euler, Runge-Kutta method, Heun scheme.</p>
+<p><strong>NOTE: The module is still in its early stages of development. Thank you for any comments!</strong></p>
+<h2 id="installation">Installation</h2>
+<h3 id="with-pip-git">With pip + git</h3>
+<ol>
+<li>Use pip to install module from github<pre><code class="lang-sh">pip install -e git+https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/msoczi/</span>odepy<span class="hljs-comment">#egg=odepy</span>
+</code></pre>
+</li>
+<li>Run python and import module:<pre><code class="lang-python"><span class="hljs-keyword">import</span> odepy
+</code></pre>
+</li>
+</ol>
+
+
+
+<span class="hljs-section"><p>## Examples</p></span>
+
+<span class="hljs-section"><p>### Example1</p></span>
+
+Let's consider a simple first-order differential equation with dependent variable <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=t" alt="equation">.
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\frac{dx}{dt}=x%2Be^t" alt="equation">
+<br>
+How to solve them with odepy?<br>
+First, we need to properly define our equation, i.e. write it in a form that depends on the derivative function.
+<br>
+<span style="white-space: pre-line">
+<code>
+import math
+def simple_equation(t, *x):
+<span class="tab"></span># x' = x + e^t
+<span class="tab"></span>return (x[0] + math.exp(t), )
+</code>
+</span>
+
+
+</pre><p>Note that the tuple returned by the function has a comma (this is because the implementation allows you to solve equations of any order <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation">, then the tuple will consist of <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation"> elements, for more refer to <a href="#Example3">Example3</a> ). <br>
+The notation <code>*x</code> allows you to specify any number of arguments of the function, that is, any number of variables in the equation. Variables of the equation are defined as subsequent elements of the argument list <code>x</code> and we refer to them by the index, e.g. <code>x[0], x[1], ...</code>. <br>
+The next step is to define a <em>solver</em> that will solve the previously defined equation. For example:</p>
+<pre><code class="lang-python">solver = odepy.ODE_solver(simple_equation, <span class="hljs-number">10000</span>, <span class="hljs-number">2</span>, <span class="hljs-number">-4</span>, <span class="hljs-number">-0.1</span>)
+</code></pre>
+<p>The arguments of which are accordingly <code>(equation, N, T, t0, *args)</code>, where: <br></p>
+<ol>
+<li><code>equation [function]</code> - is the function defining the equation to be solved,</li>
+<li><code>N [int]</code> - is an integer specifying the number of points at which the equation is calculated. Generally, the greater the number, the more accurate the solution,</li>
+<li><code>T [float]</code> - the upper boundary of the interval <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=[t_0,T]" alt="equation"> on which we solve the equation</li>
+<li><code>t0 [float]</code> - the lower boundary of the interval <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=[t_0,T]" alt="equation"> on which we solve the equation</li>
+<li><code>*args [float]</code> - a set of initial conditions for dependent variables in the order <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x_0,x_1,x_2,..." alt="equation">. Depending on the order of the equation, an appropriate number of initial conditions should be given. For example, for an equation of order 2, two numbers should be given <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x_0(t_0),x_1(t_0)" alt="equation">.</li>
+</ol>
+<p>So, the <em>solver</em> defined above will solve the equation <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{x}=x%2Be^t" alt="equation"> on the interval [-4,2] with mesh density N=10000 and the initial condition x(-4)=-0.1.<br>
+Once we have defined the <em>solver</em>, we can start solving the equation.</p>
+<pre><code class="lang-python">solver.<span class="hljs-built_in">solve</span>()
+</code></pre>
+<p>The default scheme used by <code>solve()</code> is the classical 4th order Runge-Kutta scheme. Other methods are also available. To use them, just specify the appropriate value in the <code>methods</code> argument. E.g.</p>
+<pre><code class="lang-python">solver.solve(<span class="hljs-function"><span class="hljs-keyword">method</span>='<span class="hljs-title">euler</span>')</span>
+</code></pre>
+<p>Available methods:</p>
+<ul>
+<li><code>rk4</code> - 4th Order Runge-Kutta scheme</li>
+<li><code>rk2</code> - 2nd Order Runge-Kutta scheme</li>
+<li><code>heun</code> - Heun scheme</li>
+<li><code>euler</code> - Euler scheme (1st Order Runge-Kutta scheme)</li>
+</ul>
+<p>The solution of the equation is stored in the attributes of the <code>ODE_solver</code> class. Each of the dimensions, i.e. <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=t,x_0,x_1,..." alt="equation">, is stored in a separate attribute with just such a name. We can refer to them through:</p>
+<pre><code class="lang-python">solver<span class="hljs-selector-class">.t_values</span>
+solver<span class="hljs-selector-class">.x0_values</span>
+solver<span class="hljs-selector-class">.x1_values</span>
+solver<span class="hljs-selector-class">.x2_values</span>
+...
+</code></pre>
+<p>The solution of the equation can be drawn using the matplotlib module:</p>
+<pre><code class="lang-python"><span class="hljs-selector-tag">plt</span><span class="hljs-selector-class">.plot</span>(solver.t_values, solver.x0_values)
+<span class="hljs-selector-tag">plt</span><span class="hljs-selector-class">.xlabel</span>(<span class="hljs-string">'t'</span>)
+<span class="hljs-selector-tag">plt</span><span class="hljs-selector-class">.ylabel</span>(<span class="hljs-string">'x(t)'</span>)
+<span class="hljs-selector-tag">plt</span><span class="hljs-selector-class">.title</span>(<span class="hljs-string">'Solution of equation $\dot{x}=x+e^t$ for x(-4)=-0.1'</span>)
+<span class="hljs-selector-tag">plt</span><span class="hljs-selector-class">.show</span>()
+</code></pre>
+<p><img src="exmpl_img/main_example_1.png" alt="main_example_1.png" title="Ex 1"></p>
+<p><br></p>
+<h3 id="example2">Example2</h3>
+<p>Below is an example of using <code>odepy</code> for a system of equations <br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\frac{dx_0}{dt}=rx_0-ax_0x_1" alt="equation"> <br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\frac{dx_1}{dt}=-sx_1%2Babx_0x_1" alt="equation"> <br>
+With parameters <code>r=1, a=1, s=0.5, b=0.5</code>, and the initial conditions <code>x_0(0)=1,x_1(0)=0.5</code> on the interval <code>[0, 25]</code>.</p>
+<pre><code class="lang-python">
+# Equation parameters definition
+r=<span class="hljs-number">1</span>
+a=<span class="hljs-number">1</span>
+s=<span class="hljs-number">0.5</span>
+b=<span class="hljs-number">0.5</span>
+
+# Definition <span class="hljs-keyword">of</span> equation
+def equ_fun(t, *x):
+    # x<span class="hljs-string">' = r*x - a*x*y
+    # y'</span> = -s*y + a*b*x*y
+    return (
+        r*x[<span class="hljs-number">0</span>]-a*x[<span class="hljs-number">0</span>]*x[<span class="hljs-number">1</span>],
+        -s*x[<span class="hljs-number">1</span>]+a*b*x[<span class="hljs-number">0</span>]*x[<span class="hljs-number">1</span>]
+    )
+
+# Defining <span class="hljs-string">'solver'</span> <span class="hljs-keyword">on</span> interval [<span class="hljs-number">0</span>, <span class="hljs-number">25</span>] <span class="hljs-keyword">with</span> N=<span class="hljs-number">10000</span>
+# Initial conditions: x0(<span class="hljs-number">0</span>)=<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> x1(<span class="hljs-number">0</span>)=<span class="hljs-number">0.5</span>
+euler_solver = odepy.ODE_solver(equ_fun, <span class="hljs-number">10000</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>)
+
+# Solving equation <span class="hljs-keyword">using</span> explicit Euler <span class="hljs-function"><span class="hljs-keyword">method</span> <span class="hljs-params">(<span class="hljs-string">'euler'</span>)</span>
+<span class="hljs-title">euler_solver</span>.<span class="hljs-title">solve</span><span class="hljs-params">(<span class="hljs-keyword">method</span> = <span class="hljs-string">'euler'</span>)</span>
+
+# <span class="hljs-title">Now</span> <span class="hljs-title">we</span> <span class="hljs-title">can</span> <span class="hljs-title">draw</span> <span class="hljs-title">the</span> <span class="hljs-title">solutions</span> <span class="hljs-title">and</span> <span class="hljs-title">phase</span> <span class="hljs-title">portrait</span>
+<span class="hljs-title">import</span> <span class="hljs-title">matplotlib</span>.<span class="hljs-title">pyplot</span> <span class="hljs-title">as</span> <span class="hljs-title">plt</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">plot</span><span class="hljs-params">(euler_solver.t_values, euler_solver.x0_values, label=<span class="hljs-string">'$x_0$ - prey'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">plot</span><span class="hljs-params">(euler_solver.t_values, euler_solver.x1_values, label=<span class="hljs-string">'$x_1$ - predator'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">legend</span><span class="hljs-params">()</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">title</span><span class="hljs-params">(<span class="hljs-string">'Solution of system of differential equations'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">xlabel</span><span class="hljs-params">(<span class="hljs-string">'t'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">ylabel</span><span class="hljs-params">(<span class="hljs-string">'$x_0(t)$'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">show</span><span class="hljs-params">()</span>
+
+<span class="hljs-title">plt</span>.<span class="hljs-title">plot</span><span class="hljs-params">(euler_solver.x0_values, euler_solver.x1_values)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">title</span><span class="hljs-params">(<span class="hljs-string">'Phase portrait of system'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">xlabel</span><span class="hljs-params">(<span class="hljs-string">'$x_0(t)$'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">ylabel</span><span class="hljs-params">(<span class="hljs-string">'$x_1(t)$'</span>)</span>
+<span class="hljs-title">plt</span>.<span class="hljs-title">show</span><span class="hljs-params">()</span></span>
+</code></pre>
+<p><img src="exmpl_img/main_example_2.png" alt="main_example_2" title="Ex 2"></p>
+<h3 id="example3">Example3</h3>
+<h3 id="systems-of-equations-of-the-order-n-">Systems of equations of the order $n$</h3>
+<p><strong>DEFINITION</strong><br>
+<em>An ordinary differential equation of the order <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation"> is an equation of the form:<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=F(t,x,\dot{x},\ddot{x},...,x^{(n)})=0" alt="equation">
+<br>
+In this equation, <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=t" alt="equation"> is the independent variable and <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x" alt="equation"> is the dependent variable.</em> <br>
+Let <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=F" alt="equation"> satisfy the assumptions of the implicit function theorem locally with respect to 
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x^{(n)}" alt="equation">, then this equation can be written in the following form
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x^{(n)}(t)=f(t,x,\dot{x},\ddot{x},...,x^{(n-1)}))" alt="equation">
+<br>
+On the other hand, the <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation">-th order equation in the explicit form can be easily reduced to the <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation"> systems of first order equation. To do this, use a substitution <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x_i(t)=x^{(i-1)}(t))" alt="equation"> for <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=i=1,2,...,n" alt="equation"> i.e.:
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x_0(t)=x(t),x_1(t)=\dot{x}(t),x_2(t)=\ddot{x}(t),...,x_{n-1}(t)=x^{(n-1)}(t)" alt="equation">
+<br>
+Then if
+<br>
+<img src="/exmpl_img/eq1.PNG" alt="eq">
+<br>
+equation of <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=n" alt="equation">-th order <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x^{(n)}(t)=f(t,x,\dot{x},\ddot{x},...,x^{(n-1)})" alt="equation"> can be written as:
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{y}=g(t,y" alt="equation">)
+<br>
+where <img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=g(t,y)" alt="equation"> is a vector
+<br>
+<img src="/exmpl_img/eq2.PNG" alt="eq">
+<br></p>
+<h4 id="simple-example-">Simple example:</h4>
+<p>Convert the 3rd order equation
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=x^{(3)}=2\ddot{x}-5\dot{x}%2Bx" alt="equation">
+<br>
+into a system of 3 first order equations.
+Let
+<br>
+<img src="/exmpl_img/eq3.PNG" alt="eq">
+<br>
+then
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{x}_2=2x_2-5x_1%2Bx_0" alt="equation">
+<br>
+Finally we get a system of equations:
+<br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{x}_0=x_1" alt="equation"><br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{x}_1=x_2" alt="equation"><br>
+<img src="http://chart.apis.google.com/chart?cht=tx&amp;chl=\dot{x}_2=2x_2-5x_1%2Bx_0" alt="equation"><br>
+<br>
+The above system of equations can be already defined in the <code>odepy</code> module.</p>
+<pre><code class="lang-python">def equation(t, *x):
+    return (
+        x<span class="hljs-string">[1]</span>,
+        x<span class="hljs-string">[2]</span>,
+        <span class="hljs-number">2</span>*x<span class="hljs-string">[2]</span>-<span class="hljs-number">5</span>*x<span class="hljs-string">[1]</span>+x<span class="hljs-string">[0]</span>
+    )
+</code></pre>
+<p>For more examples, please refer to this <a href="/exmpl_img/examples.md">page</a>._</p>
+<h2 id="contact">Contact</h2>
+<p>Mateusz Soczewka - msoczewkas@gmail.com <br>
+<br>
+Thank you for any comments.</p>
+<h2 id="bibliography">Sources</h2>
+<ul>
+<li>[1] <em>Równania różniczkowe zwyczajne: teoria i metody numeryczne z wykorzystaniem komputerowego systemu obliczeń symbolicznych</em>, Andrzej Palczewski, 2004, WNT</li>
+<li>[2] <em>Nonlinear Ordinary Differential Equations: An Introduction for Scientists and Engineers</em>, Dominic Jordan, Peter Smith</li>
+<li>[3] <a href="http://mst.mimuw.edu.pl/lecture.php?lecture=nrr">http://mst.mimuw.edu.pl/lecture.php?lecture=nrr</a></li>
+<li>[4] <a href="http://www.deltami.edu.pl/temat/matematyka/zastosowania/2014/08/02/O_pewnym_ciekawym_zastosowaniu_m/">http://www.deltami.edu.pl/temat/matematyka/zastosowania/2014/08/02/O_pewnym_ciekawym_zastosowaniu_m/</a></li>
+</ul>
